@@ -2,7 +2,7 @@
 
 ![Animation of four 3D point clouds rotating](point_e/examples/paper_banner.gif)
 
-This is the official code and model release for [Point-E: A System for Generating 3D Point Clouds from Complex Prompts](https://arxiv.org/).
+This is the official code and model release for [Point-E: A System for Generating 3D Point Clouds from Complex Prompts](https://arxiv.org/abs/2212.08751).
 
 # Usage
 

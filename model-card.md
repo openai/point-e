@@ -1,6 +1,6 @@
 # Model Card: Point-E
 
-This is the official codebase for running the point cloud diffusion models and SDF regression models described in [Point-E: A System for Generating 3D Point Clouds from Complex Prompts](https://arxiv.org/). These models were trained and released by OpenAI.
+This is the official codebase for running the point cloud diffusion models and SDF regression models described in [Point-E: A System for Generating 3D Point Clouds from Complex Prompts](https://arxiv.org/abs/2212.08751). These models were trained and released by OpenAI.
 Following [Model Cards for Model Reporting (Mitchell et al.)](https://arxiv.org/abs/1810.03993), we're providing some information about how the models were trained and evaluated. 
 
 # Model Details
@@ -27,7 +27,7 @@ December 2022
 
 ## Paper & samples
 
-[Paper](https://arxiv.org/) / [Sample point clouds](point_e/examples/paper_banner.gif)
+[Paper](https://arxiv.org/abs/2212.08751) / [Sample point clouds](point_e/examples/paper_banner.gif)
 
 # Training data
 
