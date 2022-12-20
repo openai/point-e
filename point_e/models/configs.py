@@ -1,3 +1,4 @@
+import sys
 from typing import Any, Dict
 
 import torch
@@ -117,18 +118,7 @@ MODEL_CONFIGS = {
 def model_from_config(config: Dict[str, Any], device: torch.device) -> nn.Module:
     config = config.copy()
     name = config.pop("name")
-    if name == "PointDiffusionTransformer":
-        return PointDiffusionTransformer(device=device, dtype=torch.float32, **config)
-    elif name == "CLIPImagePointDiffusionTransformer":
-        return CLIPImagePointDiffusionTransformer(device=device, dtype=torch.float32, **config)
-    elif name == "CLIPImageGridPointDiffusionTransformer":
-        return CLIPImageGridPointDiffusionTransformer(device=device, dtype=torch.float32, **config)
-    elif name == "UpsamplePointDiffusionTransformer":
-        return UpsamplePointDiffusionTransformer(device=device, dtype=torch.float32, **config)
-    elif name == "CLIPImageGridUpsamplePointDiffusionTransformer":
-        return CLIPImageGridUpsamplePointDiffusionTransformer(
-            device=device, dtype=torch.float32, **config
-        )
-    elif name == "CrossAttentionPointCloudSDFModel":
-        return CrossAttentionPointCloudSDFModel(device=device, dtype=torch.float32, **config)
-    raise ValueError(f"unknown model name: {name}")
+    transformer_class = getattr(sys.modules[__name__], name, None)
+    if transformer_class is None:
+        raise ValueError(f"unknown model name: {name}")
+    return transformer_class(device=device, dtype=torch.float32, **config)
