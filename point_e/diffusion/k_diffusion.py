@@ -93,7 +93,7 @@ class GaussianToKarrasDenoiser:
         elif alpha_cumprod <= self.diffusion.alphas_cumprod[-1]:
             return self.diffusion.num_timesteps - 1
         else:
-            return float(self.alpha_cumprod_to_t(alpha_cumprod))
+            return int(self.alpha_cumprod_to_t(alpha_cumprod))
 
     def denoise(self, x_t, sigmas, clip_denoised=True, model_kwargs=None):
         t = th.tensor(
