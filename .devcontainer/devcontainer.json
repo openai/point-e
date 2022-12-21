@@ -4,5 +4,13 @@
     "hostRequirements": {
         "memory": "8gb",
         "cpus": 8
-    }
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"ms-toolsai.jupyter"
+			]
+		}
+	}
 }
