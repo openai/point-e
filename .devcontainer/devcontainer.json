@@ -2,7 +2,7 @@
     "image": "mcr.microsoft.com/devcontainers/universal:2",
     "postCreateCommand": "pip install -e .",
     "hostRequirements": {
-        "memory": "8gb",
+        "memory": "16gb",
         "cpus": 8
 	},
 	"customizations": {
