@@ -14,6 +14,8 @@ from .pointnet2_cls_ssg import get_model
 def get_torch_devices() -> List[Union[str, torch.device]]:
     if torch.cuda.is_available():
         return [torch.device(f"cuda:{i}") for i in range(torch.cuda.device_count())]
+    if torch.backends.mps.is_available():
+        return [torch.device("mps")]
     else:
         return ["cpu"]
 
