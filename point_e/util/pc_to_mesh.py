@@ -1,7 +1,7 @@
 from typing import Dict
 
 import numpy as np
-import skimage
+import skimage.measure as measure
 import torch
 from tqdm.auto import tqdm
 
@@ -67,7 +67,7 @@ def marching_cubes_mesh(
         # marching cubes unless we center it.
         volume_np -= np.mean(volume_np)
 
-    verts, faces, normals, _ = skimage.measure.marching_cubes(
+    verts, faces, normals, _ = measure.marching_cubes(
         volume=volume_np,
         level=0,
         allow_degenerate=False,
