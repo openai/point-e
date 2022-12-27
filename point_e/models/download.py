@@ -61,7 +61,7 @@ def fetch_file_cached(
         # Create a temporary file and download the file in chunks
         tmp_path = local_path + ".tmp"
         with open(tmp_path, "wb") as f:
-            for chunk in response.iter_content(chunk_size=chunk_size):
+            for chunk in response.iter_content(chunk_size):
                 if progress:
                     pbar.update(len(chunk))
                 f.write(chunk)
