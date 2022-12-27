@@ -24,7 +24,7 @@ else:
 
 
 def get_cuda_bare_metal_version(cuda_dir):
-    raw_output = subprocess.check_output([cuda_dir + "/bin/nvcc", "-V"], universal_newlines=True)
+    raw_output = subprocess.check_output([os.path.join(cuda_dir, "bin", "nvcc"), "-V"], universal_newlines=True)
     output = raw_output.split()
     release_idx = output.index("release") + 1
     release = output[release_idx].split(".")
@@ -42,8 +42,8 @@ def get_include_dirs():
             include_dirs.append(os.environ["CUB_HOME"])
         else:
             if int(bare_metal_major) < 11:
-                logging.warning(f'Including default CUB_HOME ({os.path.join(cwd, "third_party/cub")}).')
-                include_dirs.append(os.path.join(cwd, 'third_party/cub'))
+                logging.warning(f'Including default CUB_HOME ({os.path.join(cwd, "third_party", "cub")}).')
+                include_dirs.append(os.path.join(cwd, 'third_party', 'cub'))
 
     return include_dirs
 
@@ -94,6 +94,7 @@ setup(
         "point_e.evals",
         "point_e.models",
         "point_e.util",
+        "point_e.commands",
     ],
     install_requires=[
         "filelock",
