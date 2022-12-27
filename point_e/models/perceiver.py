@@ -84,25 +84,43 @@ class ResidualCrossAttentionBlock(nn.Module):
         if data_width is None:
             data_width = width
 
-        self.attn = MultiheadCrossAttention(
-            device=device,
-            dtype=dtype,
-            n_data=n_data,
-            width=width,
-            heads=heads,
-            data_width=data_width,
-            init_scale=init_scale,
-        )
-        self.ln_1 = nn.LayerNorm(width, device=device, dtype=dtype)
-        self.ln_2 = nn.LayerNorm(data_width, device=device, dtype=dtype)
-        self.mlp = MLP(device=device, dtype=dtype, width=width, init_scale=init_scale)
-        self.ln_3 = nn.LayerNorm(width, device=device, dtype=dtype)
+        # Use the torch.cuda.device_of() function to determine if the input tensors are on the GPU or CPU, 
+        # and then use the appropriate layer implementations for better performance. 
+        # Uses the torch.no_grad() context manager to prevent the model from tracking gradients in the forward pass.
+        if device.type == "cuda":
+            self.ln_1 = nn.CUDALayerNorm(width, device=device, dtype=dtype)
+            self.ln_2 = nn.CUDALayerNorm(data_width, device=device, dtype=dtype)
+            self.ln_3 = nn.CUDALayerNorm(width, device=device, dtype=dtype)
+            self.attn = MultiheadCrossAttention(
+                device=device,
+                dtype=dtype,
+                n_data=n_data,
+                width=width,
+                heads=heads,
+                data_width=data_width,
+                init_scale=init_scale,
+            )
+            self.mlp = MLP(device=device, dtype=dtype, width=width, init_scale=init_scale)
+        else:
+            self.ln_1 = nn.LayerNorm(width, device=device, dtype=dtype)
+            self.ln_2 = nn.LayerNorm(data_width, device=device, dtype=dtype)
+            self.ln_3 = nn.LayerNorm(width, device=device, dtype=dtype)
+            self.attn = MultiheadCrossAttention(
+                device=device,
+                dtype=dtype,
+                n_data=n_data,
+                width=width,
+                heads=heads,
+                data_width=data_width,
+                init_scale=init_scale,
+            )
+            self.mlp = MLP(device=device, dtype=dtype, width=width, init_scale=init_scale)
 
     def forward(self, x: torch.Tensor, data: torch.Tensor):
-        x = x + self.attn(self.ln_1(x), self.ln_2(data))
-        x = x + self.mlp(self.ln_3(x))
+        with torch.no_grad():
+            x = x + self.attn(self.ln_1(x), self.ln_2(data))
+            x = x + self.mlp(self.ln_3(x))
         return x
-
 
 class SimplePerceiver(nn.Module):
     """
