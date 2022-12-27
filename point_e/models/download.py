@@ -52,17 +52,19 @@ def fetch_file_cached(
     response = requests.get(url, stream=True)
     size = int(response.headers.get("content-length", "0"))
 
-    # Use a progress bar if desired
-    if progress:
-        pbar = tqdm(total=size, unit="iB", unit_scale=True)
+    # Lock before opening / creating file
+    with FileLock(local_path + ".lock"):
+        # Use a progress bar if desired
+        if progress:
+            pbar = tqdm(total=size, unit="iB", unit_scale=True)
 
-    # Create a temporary file and download the file in chunks
-    tmp_path = local_path + ".tmp"
-    with open(tmp_path, "wb") as f:
-        for chunk in response.iter_content(chunk_size=chunk_size):
-            if progress:
-                pbar.update(len(chunk))
-            f.write(chunk)
+        # Create a temporary file and download the file in chunks
+        tmp_path = local_path + ".tmp"
+        with open(tmp_path, "wb") as f:
+            for chunk in response.iter_content(chunk_size=chunk_size):
+                if progress:
+                    pbar.update(len(chunk))
+                f.write(chunk)
 
     # Use shutil to copy the file from the temporary location to the final destination
     shutil.copyfile(tmp_path, local_path)
@@ -74,6 +76,7 @@ def fetch_file_cached(
     if progress:
         pbar.close()
 
+    # Return local path
     return local_path
 
 
