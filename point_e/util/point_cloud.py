@@ -76,17 +76,18 @@ class PointCloud:
             else None
         )
         if isinstance(f, str):
-            with open(f, "wb") as writer:
+            with open(f, "w") as writer:
                 write_txt(
                     writer,
                     coords=self.coords,
                     rgb=rgb,
                 )
-        write_txt(
-            f,
-            coords=self.coords,
-            rgb=rgb,
-        )
+        else:
+            write_txt(
+                f,
+                coords=self.coords,
+                rgb=rgb,
+            )
 
     def random_sample(self, num_points: int, **subsample_kwargs) -> "PointCloud":
         """
