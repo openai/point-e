@@ -1,4 +1,5 @@
 from setuptools import setup
+import torch
 
 setup(
     name="point-e",
