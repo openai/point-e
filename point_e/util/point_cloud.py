@@ -1,10 +1,11 @@
 import random
 from dataclasses import dataclass
-from typing import BinaryIO, Dict, List, Optional, Union
+from typing import BinaryIO, Dict, List, Optional, Union, TextIO
 
 import numpy as np
 
 from .ply_util import write_ply
+from .txt_util import write_txt
 
 COLORS = frozenset(["R", "G", "B", "A"])
 
@@ -65,6 +66,28 @@ class PointCloud:
             ),
         )
 
+    def write_txt(self, f: Union[str, TextIO]):
+        """
+        Save the point cloud to a .txt file.
+        """
+        rgb = (
+            np.stack([self.channels[x] for x in "RGB"], axis=1
+                     ) if all(x in self.channels for x in "RGB")
+            else None
+        )
+        if isinstance(f, str):
+            with open(f, "wb") as writer:
+                write_txt(
+                    writer,
+                    coords=self.coords,
+                    rgb=rgb,
+                )
+        write_txt(
+            f,
+            coords=self.coords,
+            rgb=rgb,
+        )
+
     def random_sample(self, num_points: int, **subsample_kwargs) -> "PointCloud":
         """
         Sample a random subset of this PointCloud.
@@ -80,7 +103,7 @@ class PointCloud:
         return self.subsample(indices, **subsample_kwargs)
 
     def farthest_point_sample(
-        self, num_points: int, init_idx: Optional[int] = None, **subsample_kwargs
+            self, num_points: int, init_idx: Optional[int] = None, **subsample_kwargs
     ) -> "PointCloud":
         """
         Sample a subset of the point cloud that is evenly distributed in space.
@@ -104,7 +127,7 @@ class PointCloud:
         init_idx = random.randrange(len(self.coords)) if init_idx is None else init_idx
         indices = np.zeros([num_points], dtype=np.int64)
         indices[0] = init_idx
-        sq_norms = np.sum(self.coords**2, axis=-1)
+        sq_norms = np.sum(self.coords ** 2, axis=-1)
 
         def compute_dists(idx: int):
             # Utilize equality: ||A-B||^2 = ||A||^2 + ||B||^2 - 2*(A @ B).
@@ -156,11 +179,11 @@ class PointCloud:
                            make the computation faster.
         :return: an [N] array of indices into self.coords.
         """
-        norms = np.sum(self.coords**2, axis=-1)
+        norms = np.sum(self.coords ** 2, axis=-1)
         all_indices = []
         for i in range(0, len(points), batch_size):
-            batch = points[i : i + batch_size]
-            dists = norms + np.sum(batch**2, axis=-1)[:, None] - 2 * (batch @ self.coords.T)
+            batch = points[i: i + batch_size]
+            dists = norms + np.sum(batch ** 2, axis=-1)[:, None] - 2 * (batch @ self.coords.T)
             all_indices.append(np.argmin(dists, axis=-1))
         return np.concatenate(all_indices, axis=0)
 
