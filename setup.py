@@ -12,7 +12,6 @@ setup(
     install_requires=[
         "filelock",
         "Pillow",
-        "shutil",
         "torch",
         "fire",
         "humanize",
