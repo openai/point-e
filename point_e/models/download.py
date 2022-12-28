@@ -44,39 +44,31 @@ def fetch_file_cached(
     os.makedirs(cache_dir, exist_ok=True)
     local_path = os.path.join(cache_dir, url.split("/")[-1])
 
-    # If local path exists return it
     if os.path.exists(local_path):
         return local_path
 
-    # Download the file using the requests library
     response = requests.get(url, stream=True)
     size = int(response.headers.get("content-length", "0"))
 
-    # Lock before opening / creating file
     with FileLock(local_path + ".lock"):
-        # Use a progress bar if desired
         if progress:
             pbar = tqdm(total=size, unit="iB", unit_scale=True)
 
-        # Create a temporary file and download the file in chunks
         tmp_path = local_path + ".tmp"
+
         with open(tmp_path, "wb") as f:
             for chunk in response.iter_content(chunk_size):
                 if progress:
                     pbar.update(len(chunk))
                 f.write(chunk)
-
-    # Use shutil to copy the file from the temporary location to the final destination
+                
     shutil.copyfile(tmp_path, local_path)
-
-    # Clean up the temporary file
+    
     os.remove(tmp_path)
-
-    # Hide progress bar
+    
     if progress:
         pbar.close()
-
-    # Return local path
+        
     return local_path
 
 
