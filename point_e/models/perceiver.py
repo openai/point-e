@@ -1,6 +1,7 @@
 import math
 from typing import Optional
 
+import apex
 import torch
 import torch.nn as nn
 
@@ -88,9 +89,9 @@ class ResidualCrossAttentionBlock(nn.Module):
         # and then use the appropriate layer implementations for better performance. 
         # Uses the torch.no_grad() context manager to prevent the model from tracking gradients in the forward pass.
         if device.type == "cuda":
-            self.ln_1 = nn.CUDALayerNorm(width, device=device, dtype=dtype)
-            self.ln_2 = nn.CUDALayerNorm(data_width, device=device, dtype=dtype)
-            self.ln_3 = nn.CUDALayerNorm(width, device=device, dtype=dtype)
+            self.ln_1 = apex.normalization.FusedLayerNorm(width, device=device, dtype=dtype)
+            self.ln_2 = apex.normalization.FusedLayerNorm(data_width, device=device, dtype=dtype)
+            self.ln_3 = apex.normalization.FusedLayerNorm(width, device=device, dtype=dtype)
             self.attn = MultiheadCrossAttention(
                 device=device,
                 dtype=dtype,
