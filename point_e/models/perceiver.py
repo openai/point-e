@@ -1,12 +1,11 @@
 import math
-from typing import Optional
-
-import apex
 import torch
 import torch.nn as nn
 
 from .checkpoint import checkpoint
 from .transformer import MLP, init_linear
+from typing import Optional
+from apex.normalization import FusedLayerNorm
 
 
 class MultiheadCrossAttention(nn.Module):
@@ -88,34 +87,26 @@ class ResidualCrossAttentionBlock(nn.Module):
         # Use the torch.cuda.device_of() function to determine if the input tensors are on the GPU or CPU, 
         # and then use the appropriate layer implementations for better performance. 
         # Uses the torch.no_grad() context manager to prevent the model from tracking gradients in the forward pass.
+
         if device.type == "cuda":
-            self.ln_1 = apex.normalization.FusedLayerNorm(width, device=device, dtype=dtype)
-            self.ln_2 = apex.normalization.FusedLayerNorm(data_width, device=device, dtype=dtype)
-            self.ln_3 = apex.normalization.FusedLayerNorm(width, device=device, dtype=dtype)
-            self.attn = MultiheadCrossAttention(
-                device=device,
-                dtype=dtype,
-                n_data=n_data,
-                width=width,
-                heads=heads,
-                data_width=data_width,
-                init_scale=init_scale,
-            )
-            self.mlp = MLP(device=device, dtype=dtype, width=width, init_scale=init_scale)
+            self.ln_1 = FusedLayerNorm(width, device=device, dtype=dtype)
+            self.ln_2 = FusedLayerNorm(data_width, device=device, dtype=dtype)
+            self.ln_3 = FusedLayerNorm(width, device=device, dtype=dtype)
         else:
             self.ln_1 = nn.LayerNorm(width, device=device, dtype=dtype)
             self.ln_2 = nn.LayerNorm(data_width, device=device, dtype=dtype)
             self.ln_3 = nn.LayerNorm(width, device=device, dtype=dtype)
-            self.attn = MultiheadCrossAttention(
-                device=device,
-                dtype=dtype,
-                n_data=n_data,
-                width=width,
-                heads=heads,
-                data_width=data_width,
-                init_scale=init_scale,
-            )
-            self.mlp = MLP(device=device, dtype=dtype, width=width, init_scale=init_scale)
+        
+        self.attn = MultiheadCrossAttention(
+            device=device,
+            dtype=dtype,
+            n_data=n_data,
+            width=width,
+            heads=heads,
+            data_width=data_width,
+            init_scale=init_scale,
+        )
+        self.mlp = MLP(device=device, dtype=dtype, width=width, init_scale=init_scale)
 
     def forward(self, x: torch.Tensor, data: torch.Tensor):
         with torch.no_grad():
