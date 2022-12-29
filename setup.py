@@ -13,6 +13,7 @@ setup(
         "filelock",
         "Pillow",
         "torch",
+        "apex",
         "fire",
         "humanize",
         "requests",
