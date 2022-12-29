@@ -13,7 +13,7 @@ setup(
         "filelock",
         "Pillow",
         "torch",
-        "apex",
+        "apex @ git+https://github.com/NVIDIA/apex.git",
         "fire",
         "humanize",
         "requests",
