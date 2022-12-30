@@ -86,18 +86,10 @@ class ResidualCrossAttentionBlock(nn.Module):
         if data_width is None:
             data_width = width
 
-        # Use the torch.cuda.device_of() function to determine if the input tensors are on the GPU or CPU, 
-        # and then use the appropriate layer implementations for better performance. 
-        # Uses the torch.no_grad() context manager to prevent the model from tracking gradients in the forward pass.
-
-        if device.type == "cuda":
-            self.ln_1 = FusedLayerNorm(width, device=device, dtype=dtype)
-            self.ln_2 = FusedLayerNorm(data_width, device=device, dtype=dtype)
-            self.ln_3 = FusedLayerNorm(width, device=device, dtype=dtype)
-        else:
-            self.ln_1 = nn.LayerNorm(width, device=device, dtype=dtype)
-            self.ln_2 = nn.LayerNorm(data_width, device=device, dtype=dtype)
-            self.ln_3 = nn.LayerNorm(width, device=device, dtype=dtype)
+        # Use the FusedLayerNorm module for faster layer normalization on GPU
+        self.ln_1 = FusedLayerNorm(width, device=device, dtype=dtype)
+        self.ln_2 = FusedLayerNorm(data_width, device=device, dtype=dtype)
+        self.ln_3 = FusedLayerNorm(width, device=device, dtype=dtype)
         
         self.attn = MultiheadCrossAttention(
             device=device,
@@ -110,10 +102,16 @@ class ResidualCrossAttentionBlock(nn.Module):
         )
         self.mlp = MLP(device=device, dtype=dtype, width=width, init_scale=init_scale)
 
-    def forward(self, x: torch.Tensor, data: torch.Tensor):
+    def forward(self, x: torch.Tensor, data: torch.Tensor, device: torch.device):
         with torch.no_grad():
+            # Use the to() method to move the input tensors to the specified device
+            x = x.to(device)
+            data = data.to(device)
+
+            # Normalize input tensors and pass them through the attention and MLP layers
             x = x + self.attn(self.ln_1(x), self.ln_2(data))
             x = x + self.mlp(self.ln_3(x))
+
         return x
 
 class SimplePerceiver(nn.Module):
