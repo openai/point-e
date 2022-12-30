@@ -86,10 +86,15 @@ class ResidualCrossAttentionBlock(nn.Module):
         if data_width is None:
             data_width = width
 
-        # Use the FusedLayerNorm module for faster layer normalization on GPU
-        self.ln_1 = FusedLayerNorm(width, device=device, dtype=dtype)
-        self.ln_2 = FusedLayerNorm(data_width, device=device, dtype=dtype)
-        self.ln_3 = FusedLayerNorm(width, device=device, dtype=dtype)
+        if device.type == "cuda":
+           # Use the FusedLayerNorm module for faster layer normalization on GPU
+            self.ln_1 = FusedLayerNorm(width, device=device, dtype=dtype)
+            self.ln_2 = FusedLayerNorm(data_width, device=device, dtype=dtype)
+            self.ln_3 = FusedLayerNorm(width, device=device, dtype=dtype)
+        else:
+            self.ln_1 = nn.LayerNorm(width, device=device, dtype=dtype)
+            self.ln_2 = nn.LayerNorm(data_width, device=device, dtype=dtype)
+            self.ln_3 = nn.LayerNorm(width, device=device, dtype=dtype)
         
         self.attn = MultiheadCrossAttention(
             device=device,
