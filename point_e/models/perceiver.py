@@ -5,7 +5,6 @@ import torch.nn as nn
 from .checkpoint import checkpoint
 from .transformer import MLP, init_linear
 from typing import Optional
-from apex.normalization import FusedLayerNorm
 
 
 class MultiheadCrossAttention(nn.Module):
