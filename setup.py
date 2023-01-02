@@ -22,6 +22,8 @@ setup(
         "scipy",
         "numpy",
         "clip @ git+https://github.com/openai/CLIP.git",
+        "pytest",
+        "nbmake",
     ],
     author="OpenAI",
 )
