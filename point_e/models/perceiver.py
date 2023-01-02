@@ -102,10 +102,6 @@ class ResidualCrossAttentionBlock(nn.Module):
 
     def forward(self, x: torch.Tensor, data: torch.Tensor):
         with torch.no_grad():
-            # Use the to() method to move the input tensors to the specified device
-            x = x.to(torch.device)
-            data = data.to(torch.device)
-
             # Normalize input tensors and pass them through the attention and MLP layers
             x = x + self.attn(self.ln_1(x), self.ln_2(data))
             x = x + self.mlp(self.ln_3(x))
